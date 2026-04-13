@@ -1,0 +1,5 @@
+$kind: http-request
+name: Clustering
+url: "{{fastapi_url}}/api/ml/cluster"
+method: POST
+order: 1845946839461954

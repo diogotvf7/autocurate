@@ -12,21 +12,15 @@ app = FastAPI(
 )
 
 
-class ClusterRequest(BaseModel):
-    n_clusters: int = 5
-
-
 @app.get("/")
 def health_check():
     return {"status": "ok", "service": "clustering-engine"}
 
 
 @app.post("/api/ml/cluster")
-def generate_clusters(request: ClusterRequest):
+def generate_clusters():
     try:
-        print(
-            f"DEBUG: Starting clustering process for {request.n_clusters} clusters..."
-        )
+        print(f"Received clustering request.")
 
         df = fetch_tracks_as_df()
         if df is None or df.empty:
@@ -34,11 +28,11 @@ def generate_clusters(request: ClusterRequest):
                 status_code=404, detail="No tracks found in the database."
             )
 
-        clusters_dict = cluster_tracks(df, n_clusters=request.n_clusters)
+        clusters_dict = cluster_tracks(df)
 
         return {
             "status": "success",
-            "message": f"Successfully grouped {len(df)} tracks into {request.n_clusters} clusters.",
+            "message": f"Successfully grouped {len(df)} tracks into {len(clusters_dict)} clusters.",
             "clusters": clusters_dict,
         }
 

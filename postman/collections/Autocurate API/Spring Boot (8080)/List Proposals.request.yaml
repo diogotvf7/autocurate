@@ -1,0 +1,5 @@
+$kind: http-request
+name: List Proposals
+url: "{{springboot_url}}/api/spotify/proposals"
+method: GET
+order: 4493600763789633

@@ -19,7 +19,8 @@ public class AuthController {
     @GetMapping("/login")
     public RedirectView getSpotifyLoginUrl() {
         String uri = spotifyApi.authorizationCodeUri()
-                .scope("user-read-private,user-read-email,playlist-read-private,playlist-read-collaborative,playlist-modify-public,playlist-modify-private")                .show_dialog(true)
+                .scope("user-read-private,user-read-email,playlist-read-private,playlist-read-collaborative,playlist-modify-public,playlist-modify-private")
+                .show_dialog(true)
                 .build()
                 .execute()
                 .toString();

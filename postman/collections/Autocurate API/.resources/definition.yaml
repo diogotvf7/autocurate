@@ -1,0 +1,5 @@
+$kind: collection
+name: Autocurate API
+variables:
+  springboot_url: ""
+  fastapi_url: ""

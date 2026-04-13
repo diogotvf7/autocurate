@@ -1,0 +1,5 @@
+$kind: http-request
+name: Health Check
+url: "{{fastapi_url}}/"
+method: GET
+order: 1776104561329

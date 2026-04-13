@@ -1,0 +1,5 @@
+$kind: http-request
+name: Auth
+url: "{{springboot_url}}/api/auth/login"
+method: GET
+order: 1776102465376

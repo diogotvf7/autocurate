@@ -1,0 +1,7 @@
+$kind: http-request
+name: Fetch Tracks
+url: "{{springboot_url}}/api/spotify/sync/:playlistId"
+method: POST
+pathVariables:
+  playlistId: 3w0ZOSlYUid1MpC2wcaPkY
+order: 4402753619753489

@@ -1,0 +1,4 @@
+$kind: http-request
+url: "{{springboot_url}}/api/spotify/playlists"
+method: GET
+order: 3402170605665106

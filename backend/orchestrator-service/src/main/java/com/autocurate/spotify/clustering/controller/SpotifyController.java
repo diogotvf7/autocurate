@@ -32,7 +32,7 @@ public class SpotifyController {
     }
 
     @PostMapping("/sync/{playlistId}")
-    public String postMethodName(@PathVariable String playlistId) {
+    public String syncPlaylist(@PathVariable String playlistId) {
         spotifySyncService.syncPlaylist(playlistId);
         return "Sync triggered for playlist: " + playlistId;
     }
@@ -43,8 +43,8 @@ public class SpotifyController {
     }
 
     @PostMapping("/proposals/generate")
-    public ResponseEntity<List<PlaylistProposal>> generateProposals(@RequestParam(defaultValue = "5") int nClusters) {
-        List<PlaylistProposal> proposals = spotifySyncService.generateAndSaveListProposals(nClusters);
+    public ResponseEntity<List<PlaylistProposal>> generateProposals() {
+        List<PlaylistProposal> proposals = spotifySyncService.generateAndSaveListProposals();
         return ResponseEntity.ok(proposals);
     }
 

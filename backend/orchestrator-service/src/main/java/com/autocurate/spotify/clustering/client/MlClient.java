@@ -1,7 +1,5 @@
 package com.autocurate.spotify.clustering.client;
 
-import java.util.Map;
-
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
@@ -17,10 +15,9 @@ public class MlClient {
         this.restTemplate = restTemplate;
     }
 
-    public ClusterResponse generateClusters(int nClusters) {
+    public ClusterResponse generateClusters() {
         try {
-            Map<String, Integer> requestBody = Map.of("n_clusters", nClusters);
-            return restTemplate.postForObject(ML_API_URL, requestBody, ClusterResponse.class);
+            return restTemplate.postForObject(ML_API_URL, null, ClusterResponse.class);
         } catch (RestClientException e) {
             throw new RuntimeException("Failed to reach Python ML Service: " + e.getMessage());
         }

@@ -83,9 +83,9 @@ public class SpotifySyncService {
         }).toList();
     }
 
-    public List<PlaylistProposal> generateAndSaveListProposals(int numClusters) {
-        System.out.println("DEBUG: Requesting " + numClusters + " clusters from ML engine...");
-        ClusterResponse mlResponse = mlClient.generateClusters(numClusters);
+    public List<PlaylistProposal> generateAndSaveListProposals() {
+        System.out.println("DEBUG: Requesting clusters from ML engine...");
+        ClusterResponse mlResponse = mlClient.generateClusters();
 
         List<PlaylistProposal> proposals = new ArrayList<>();
 
