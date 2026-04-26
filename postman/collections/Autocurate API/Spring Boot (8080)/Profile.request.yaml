@@ -1,0 +1,5 @@
+$kind: http-request
+name: Profile
+url: "{{springboot_url}}/api/auth/me/profile"
+method: GET
+order: 2017661589866362
