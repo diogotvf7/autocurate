@@ -1,0 +1,57 @@
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: autocurate-db
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: autocurate
+      POSTGRES_USER: autocurate
+      POSTGRES_PASSWORD: cozA@3AnUBt85v
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  clustering:
+    build:
+      context: ./backend/clustering-service
+    container_name: autocurate-clustering
+    ports:
+      - "8000:8000"
+    depends_on:
+      - db
+    environment:
+      - DATABASE_URL=postgresql://autocurate:cozA@3AnUBt85v@db:5432/autocurate
+
+  orchestrator:
+    build:
+      context: ./backend/orchestrator-service
+    container_name: autocurate-orchestrator
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - clustering
+    environment:
+      - DB_USERNAME=autocurate
+      - DB_PASSWORD=cozA@3AnUBt85v
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/autocurate
+      - ML_URL=http://clustering:8000
+      - FRONTEND_URL=http://localhost:3000
+      - SPOTIFY_CLIENT_ID=${SPOTIFY_CLIENT_ID}
+      - SPOTIFY_CLIENT_SECRET=${SPOTIFY_CLIENT_SECRET}
+      - LASTFM_API_KEY=${LASTFM_API_KEY}
+
+  frontend:
+    build:
+      context: ./frontend
+    container_name: autocurate-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - NEXT_PUBLIC_API_URL=http://localhost:8080
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+volumes:
+  postgres_data:
