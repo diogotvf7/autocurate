@@ -53,12 +53,17 @@ public class SpotifyClient {
         try {
             var playlists = spotifyApi.getListOfCurrentUsersPlaylists().build().execute();
             return Arrays.stream(playlists.getItems())
-                    .map(playlist -> Map.of(
-                            "id", playlist.getId(),
-                            "name", playlist.getName()))
+                    .map(playlist -> Map.of("id", playlist.getId(),
+                            "name", playlist.getName(),
+                            "description", playlist.getDescription() != null ? playlist.getDescription()
+                                    : "",
+                            "owner", playlist.getOwner().getDisplayName(),
+                            "externalUrl", playlist.getExternalUrls().get("spotify"),
+                            "imageUrl", playlist.getImages().length > 0 ? playlist.getImages()[0].getUrl() : ""))
                     .collect(Collectors.toList());
         } catch (Exception e) {
-            throw new RuntimeException("Failed to fetch user playlists: " + e.getMessage(), e);
+            throw new RuntimeException("Failed to fetch user playlists: " +
+                    e.getMessage(), e);
         }
     }
 }
