@@ -1,3 +1,12 @@
+app:
+  frontend-url: ${FRONTEND_URL:http://localhost:3000}
+
+server:
+  servlet:
+    session:
+      cookie:
+        same-site: lax
+
 spring:
   config:
     import: optional:file:.env[.properties]
@@ -6,14 +15,14 @@ spring:
     url: jdbc:postgresql://localhost:5432/autocurate
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-    driver-class-name: org.postgresql.Driver    
+    driver-class-name: org.postgresql.Driver
 
   jpa:
-    hibernate: 
+    hibernate:
       ddl-auto: update
     show-sql: true
     properties:
-      hibernate: 
+      hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format-sql: true
 
