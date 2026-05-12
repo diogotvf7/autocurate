@@ -10,7 +10,8 @@ import com.autocurate.spotify.clustering.client.MlClient;
 import com.autocurate.spotify.clustering.client.SpotifyClient;
 import com.autocurate.spotify.clustering.dto.ClusterResponse;
 import com.autocurate.spotify.clustering.dto.PlaylistProposalResponse;
-import com.autocurate.spotify.clustering.dto.SpotifyItemsResponse;
+import com.autocurate.spotify.clustering.dto.PlaylistResponse;
+import com.autocurate.spotify.clustering.dto.TrackDto;
 import com.autocurate.spotify.clustering.model.PlaylistProposal;
 import com.autocurate.spotify.clustering.model.Track;
 import com.autocurate.spotify.clustering.repository.PlaylistProposalRepository;
@@ -40,22 +41,23 @@ public class SpotifySyncService {
     }
 
     public void syncPlaylist(String playlistId) {
-        SpotifyItemsResponse response = spotifyClient.getPlaylistItems(playlistId);
+        PlaylistResponse response = spotifyClient.getPlaylist(playlistId);
         List<Track> tracksToSave = new ArrayList<>();
 
-        for (SpotifyItemsResponse.PlaylistItem playlistItem : response.items()) {
-            SpotifyItemsResponse.PlaylistItem.Track track = playlistItem.item();
+        for (TrackDto trackDto : response.tracks()) {
 
-            if (track == null)
+            if (trackRepository.existsById(trackDto.id())) {
                 continue;
+            }
 
-            if (trackRepository.existsById(track.id()))
-                continue; // Skip if track already exists
+            List<String> tags = lastFmService.getTopTags(trackDto.primaryArtist(), trackDto.name());
 
-            String artistName = track.artists().isEmpty() ? "Unknown" : track.artists().get(0).name();
-            List<String> tags = lastFmService.getTopTags(artistName, track.name());
-
-            tracksToSave.add(new Track(track.id(), track.name(), artistName, tags));
+            tracksToSave.add(new Track(
+                    trackDto.id(),
+                    trackDto.name(),
+                    trackDto.primaryArtist(),
+                    trackDto.displayArtists(),
+                    tags));
         }
 
         trackRepository.saveAll(tracksToSave);
@@ -71,7 +73,7 @@ public class SpotifySyncService {
                     .map(track -> new PlaylistProposalResponse.TrackInfo(
                             track.getSpotifyId(),
                             track.getName(),
-                            track.getArtistName()))
+                            track.getPrimaryArtist()))
                     .toList();
 
             return new PlaylistProposalResponse(

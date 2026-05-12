@@ -20,7 +20,8 @@ public class Track {
     @Id
     private String spotifyId;
     private String name;
-    private String artistName;
+    private String primaryArtist;
+    private String displayArtists;
 
     @ElementCollection
     private List<String> tags;

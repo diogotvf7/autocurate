@@ -3,21 +3,23 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { Button } from "@/components/ui/button";
-import { Loader2, Music, Sparkles } from "lucide-react";
+import { Music } from "lucide-react";
 import PlaylistCard from "./_components/PlaylistCard";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
 
 interface Playlist {
   id: string;
   name: string;
+  imageUrl?: string;
+  description?: string;
+  owner?: string;
+  externalUrl?: string;
 }
 
 export default function Dashboard() {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);
   const [loading, setLoading] = useState(true);
-  const [syncingPlaylistId, setSyncingPlaylistId] = useState<string | null>(
-    null,
-  );
   const router = useRouter();
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -31,45 +33,35 @@ export default function Dashboard() {
         setPlaylists(res.data);
         setLoading(false);
       })
-      .catch((err) => {
-        if (err.response?.status === 401) {
+      .catch((error) => {
+        if (error.response?.status === 401) {
           router.push("/login");
         } else {
-          console.error("Failed to fetch playlists:", err);
+          console.error("Failed to fetch playlists:", error);
           setLoading(false);
         }
       });
   }, [router, API_URL]);
 
-  const handleSync = async (playlistId: string) => {
-    setSyncingPlaylistId(playlistId);
-
-    try {
-      await axios.post(
-        `${API_URL}/api/spotify/playlists/${playlistId}/sync`,
-        {},
-        {
-          withCredentials: true,
-        },
-      );
-      router.push("/proposals");
-    } catch (err) {
-      console.error("Failed to sync playlist:", err);
-      alert("Something went wrong while syncing the playlist.");
-      setSyncingPlaylistId(null);
-    }
+  const handleClick = async (playlistId: string) => {
+    router.push(`/playlists/${playlistId}`);
   };
 
   if (loading) {
     return (
       <main className="min-h-screen p-8">
         <h1 className="mb-8 text-3xl font-bold">Loading your library...</h1>
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-3 lg:grid-cols-4">
-          {[1, 2, 3, 4, 5, 6].map((i) => (
-            <div
-              key={i}
-              className="h-32 animate-pulse rounded-xl border border-zinc-800 bg-zinc-900"
-            />
+        <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
+          {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+            <Card key={i} className="w-full max-w-xs">
+              <CardHeader>
+                <Skeleton className="h-4 w-2/3" />
+                <Skeleton className="h-4 w-1/2" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="aspect-video w-full" />
+              </CardContent>
+            </Card>
           ))}
         </div>
       </main>
@@ -93,15 +85,11 @@ export default function Dashboard() {
       ) : (
         <div className="grid grid-cols-2 gap-6 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6">
           {playlists.map((playlist) => {
-            const isSyncing = syncingPlaylistId === playlist.id;
-
             return (
               <PlaylistCard
                 key={playlist.id}
                 playlist={playlist}
-                isSyncing={isSyncing}
-                isAnySyncing={!!syncingPlaylistId}
-                onSync={handleSync}
+                handleClick={handleClick}
               />
             );
           })}

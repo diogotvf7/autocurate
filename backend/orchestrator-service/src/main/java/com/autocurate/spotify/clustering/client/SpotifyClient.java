@@ -1,7 +1,6 @@
 package com.autocurate.spotify.clustering.client;
 
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -12,7 +11,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
-import com.autocurate.spotify.clustering.dto.SpotifyItemsResponse;
+import com.autocurate.spotify.clustering.dto.PlaylistResponse;
+import com.autocurate.spotify.clustering.dto.RawSpotifyPlaylist;
+import com.autocurate.spotify.clustering.dto.TrackDto;
 
 import se.michaelthelin.spotify.SpotifyApi;
 
@@ -28,27 +29,61 @@ public class SpotifyClient {
         this.spotifyApi = spotifyApi;
     }
 
-    public SpotifyItemsResponse getPlaylistItems(String playlistId) {
-        String url = String.format("%s/playlists/%s/items?market=PT", BASE_URL, playlistId);
+    public PlaylistResponse getPlaylist(String playlistId) {
+        String url = String.format("%s/playlists/%s?market=PT", BASE_URL, playlistId);
 
         HttpHeaders headers = new HttpHeaders();
         headers.setBearerAuth(spotifyApi.getAccessToken());
         HttpEntity<String> entity = new HttpEntity<>(headers);
 
         try {
-            ResponseEntity<SpotifyItemsResponse> response = restTemplate.exchange(url,
-                    org.springframework.http.HttpMethod.GET, entity, SpotifyItemsResponse.class);
+            ResponseEntity<RawSpotifyPlaylist> response = restTemplate.exchange(
+                    url, org.springframework.http.HttpMethod.GET, entity, RawSpotifyPlaylist.class);
+
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
-                return response.getBody();
+                RawSpotifyPlaylist raw = response.getBody();
+
+                List<TrackDto> trackList = raw.tracks().items().stream()
+                        .filter(item -> item.track() != null)
+                        .map(item -> {
+                            var t = item.track();
+                            String primaryArtist = (t.artists() != null && !t.artists().isEmpty())
+                                    ? t.artists().get(0).name()
+                                    : "Unknown Artist";
+
+                            // 2. Join ALL artists with a comma for the frontend UI
+                            String displayArtists = (t.artists() != null && !t.artists().isEmpty())
+                                    ? t.artists().stream().map(a -> a.name()).collect(Collectors.joining(", "))
+                                    : "Unknown Artist";
+                            String albumName = t.album() != null ? t.album().name() : "Unknown Album";
+                            String trackImageUrl = (t.album() != null && t.album().images() != null
+                                    && !t.album().images().isEmpty())
+                                            ? t.album().images().get(0).url()
+                                            : "";
+
+                            return new TrackDto(
+                                    t.id(), t.name(), primaryArtist, displayArtists, albumName, t.durationMs(),
+                                    trackImageUrl);
+                        })
+                        .collect(Collectors.toList());
+
+                String ownerName = raw.owner() != null ? raw.owner().displayName() : "Unknown Owner";
+                String imageUrl = (raw.images() != null && !raw.images().isEmpty()) ? raw.images().get(0).url() : "";
+                String externalUrl = raw.externalUrls() != null ? raw.externalUrls().spotify() : "";
+                String description = raw.description() != null ? raw.description() : "";
+
+                return new PlaylistResponse(
+                        raw.id(), raw.name(), description, ownerName, imageUrl, externalUrl, trackList);
             }
         } catch (Exception e) {
-            System.out.println(
-                    "DEBUG: Failed to fetch playlist items for playlist " + playlistId + ": " + e.getMessage());
+            System.out.println("DEBUG: Failed to fetch playlist " + playlistId + ": " + e.getMessage());
+            throw new RuntimeException("Failed to fetch playlist info", e);
         }
-        return new SpotifyItemsResponse(Collections.emptyList());
 
+        throw new RuntimeException("Failed to fetch playlist info: Empty response body");
     }
 
+    // TODO: Use DTO instead of Map<String, String>
     public List<Map<String, String>> getUserPlaylists() {
         try {
             var playlists = spotifyApi.getListOfCurrentUsersPlaylists().build().execute();

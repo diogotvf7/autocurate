@@ -38,6 +38,16 @@ public class SpotifyController {
         }
     }
 
+    @GetMapping("/playlists/{playlistId}")
+    public ResponseEntity<?> getPlaylist(@PathVariable String playlistId) {
+        try {
+            return ResponseEntity.ok(spotifyClient.getPlaylist(playlistId));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                    .body("Token expired or missing. Please log in again.");
+        }
+    }
+
     @PostMapping("/sync/{playlistId}")
     public String syncPlaylist(@PathVariable String playlistId) {
         spotifySyncService.syncPlaylist(playlistId);
