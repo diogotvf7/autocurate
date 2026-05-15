@@ -1,22 +1,16 @@
+"use client";
+
 import axios from "axios";
-import { useEffect, useState } from "react";
+import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
+import { Playlist } from "@/types";
 
 interface PlaylistPageProps {
   params: Promise<{ id: string }>;
 }
 
-interface Playlist {
-  id: string;
-  name: string;
-  imageUrl?: string;
-  description?: string;
-  owner?: string;
-  externalUrl?: string;
-}
-
-export default async function PlaylistPage({ params }: PlaylistPageProps) {
-  const { id } = await params;
+export default function PlaylistPage({ params }: PlaylistPageProps) {
+  const { id } = use(params);
   const router = useRouter();
 
   const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -38,23 +32,38 @@ export default async function PlaylistPage({ params }: PlaylistPageProps) {
           console.error("Failed to fetch playlists:", error);
         }
       });
-  }, [id, API_URL]);
+  }, [id, API_URL, router]);
 
   return (
-    <div>
-      <header>
-        {playlist && (
-          <div>
-            <h1 className="text-3xl font-bold">{playlist.name}</h1>
-            <p className="text-lg text-zinc-400">{playlist.description}</p>
+    <main className="min-h-screen p-8">
+      {playlist ? (
+        <header className="mb-8 flex gap-6">
+          {playlist.imageUrl && (
+            <img
+              src={playlist.imageUrl}
+              alt={playlist.name}
+              className="h-48 w-48 rounded-lg object-cover shadow-lg"
+            />
+          )}
+          <div className="flex flex-col justify-end">
+            <span className="text-sm font-semibold tracking-wider uppercase">
+              Playlist
+            </span>
+            <h1 className="mb-2 text-5xl font-bold">{playlist.name}</h1>
+            <p className="text-lg">{playlist.description}</p>
+            {playlist.tracks && (
+              <p className="mt-2 text-sm">
+                Created by <span className="">{playlist.owner}</span> •{" "}
+                {playlist.tracks.length} songs
+              </p>
+            )}
           </div>
-        )}
-        {/* TODO
-        ~ Criar endpoint para obter detalhes da playlist (nome, descrição, imagem, etc.)
-        ~ Exibir detalhes da playlist no topo da página
-        ~ Listar músicas da playlist abaixo dos detalhes
-        */}
-      </header>
-    </div>
+        </header>
+      ) : (
+        <div className="h-48 w-full animate-pulse rounded-lg bg-zinc-900" />
+      )}
+
+      {/* The Shadcn Table will go here! */}
+    </main>
   );
 }

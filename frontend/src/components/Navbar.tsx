@@ -44,7 +44,11 @@ const Navbar = () => {
         setUser(res.data);
         setIsLoading(false);
       })
-      .catch(() => {
+      .catch((error) => {
+        if (error.response?.status === 401) {
+          console.log("User is not authenticated");
+        }
+
         setUser(null);
         setIsLoading(false);
 
@@ -92,9 +96,11 @@ const Navbar = () => {
 
   return (
     <header className="sticky top-0 z-50 flex min-w-full items-center justify-between border-b bg-inherit p-4">
-      <h1 className="scramble truncate font-mono text-4xl select-none">
-        Autocurate
-      </h1>
+      <a href="/" className="flex items-center gap-2">
+        <h1 className="scramble truncate font-mono text-4xl select-none">
+          Autocurate
+        </h1>
+      </a>
       <div className="flex size-max items-center justify-between gap-6">
         <a href="/about" className="hover:underline">
           About Us

@@ -7,15 +7,7 @@ import { Music } from "lucide-react";
 import PlaylistCard from "./_components/PlaylistCard";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
-
-interface Playlist {
-  id: string;
-  name: string;
-  imageUrl?: string;
-  description?: string;
-  owner?: string;
-  externalUrl?: string;
-}
+import { Playlist } from "@/types";
 
 export default function Dashboard() {
   const [playlists, setPlaylists] = useState<Playlist[]>([]);

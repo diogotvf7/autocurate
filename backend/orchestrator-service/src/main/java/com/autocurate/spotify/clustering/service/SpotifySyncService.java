@@ -1,16 +1,18 @@
 package com.autocurate.spotify.clustering.service;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.hc.core5.http.ParseException;
 import org.springframework.stereotype.Service;
 
 import com.autocurate.spotify.clustering.client.MlClient;
 import com.autocurate.spotify.clustering.client.SpotifyClient;
 import com.autocurate.spotify.clustering.dto.ClusterResponse;
+import com.autocurate.spotify.clustering.dto.PlaylistDto;
 import com.autocurate.spotify.clustering.dto.PlaylistProposalResponse;
-import com.autocurate.spotify.clustering.dto.PlaylistResponse;
 import com.autocurate.spotify.clustering.dto.TrackDto;
 import com.autocurate.spotify.clustering.model.PlaylistProposal;
 import com.autocurate.spotify.clustering.model.Track;
@@ -18,6 +20,7 @@ import com.autocurate.spotify.clustering.repository.PlaylistProposalRepository;
 import com.autocurate.spotify.clustering.repository.TrackRepository;
 
 import se.michaelthelin.spotify.SpotifyApi;
+import se.michaelthelin.spotify.exceptions.SpotifyWebApiException;
 
 @Service
 public class SpotifySyncService {
@@ -41,7 +44,7 @@ public class SpotifySyncService {
     }
 
     public void syncPlaylist(String playlistId) {
-        PlaylistResponse response = spotifyClient.getPlaylist(playlistId);
+        PlaylistDto response = spotifyClient.getPlaylist(playlistId);
         List<Track> tracksToSave = new ArrayList<>();
 
         for (TrackDto trackDto : response.tracks()) {
@@ -57,6 +60,9 @@ public class SpotifySyncService {
                     trackDto.name(),
                     trackDto.primaryArtist(),
                     trackDto.displayArtists(),
+                    trackDto.album(),
+                    trackDto.imageUrl(),
+                    trackDto.durationMs(),
                     tags));
         }
 
@@ -130,7 +136,7 @@ public class SpotifySyncService {
                 spotifyApi.addItemsToPlaylist(newPlaylist.getId(), trackUris).build().execute();
                 System.out.println("SUCCESS: Created playlist [" + finalPlaylistName + "]");
             }
-        } catch (Exception e) {
+        } catch (IOException | ParseException | SpotifyWebApiException e) {
             throw new RuntimeException("Failed to push to Spotify: " + e.getMessage());
         }
     }

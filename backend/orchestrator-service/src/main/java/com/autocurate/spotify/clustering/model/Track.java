@@ -21,7 +21,10 @@ public class Track {
     private String spotifyId;
     private String name;
     private String primaryArtist;
-    private String displayArtists;
+    private List<String> displayArtists;
+    private String albumName;
+    private String trackImageUrl;
+    private Integer durationMs;
 
     @ElementCollection
     private List<String> tags;

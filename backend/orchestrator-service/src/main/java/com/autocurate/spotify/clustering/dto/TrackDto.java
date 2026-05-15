@@ -1,11 +1,13 @@
 package com.autocurate.spotify.clustering.dto;
 
+import java.util.List;
+
 public record TrackDto(
                 String id,
                 String name,
                 String primaryArtist, // Last.fm API
-                String displayArtists, // Frontend display
+                List<String> displayArtists, // Frontend display
                 String album,
-                Integer durationMs,
-                String imageUrl) {
+                String imageUrl,
+                Integer durationMs) {
 }
